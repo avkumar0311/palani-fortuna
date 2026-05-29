@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palani Fortuna — Daily NSE Swing Trade Calls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  :root {
+    --bg: #FAFAF8; --surface: #FFFFFF; --surface2: #F4F4F0;
+    --border: #E8E8E3; --border2: #D4D4CC;
+    --text: #1A1A18; --text2: #6B6B65; --text3: #9E9E97;
+    --green: #0E7C5A; --green-bg: #EBF7F2; --green-mid: #1D9E75;
+    --red: #C0392B; --red-bg: #FDF0EF; --red-mid: #E74C3C;
+    --blue: #1A5FA8; --blue-bg: #EEF4FD;
+    --amber: #B45309; --amber-bg: #FEF3E2;
+    --font-sans: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --radius: 10px; --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 1px rgba(0,0,0,0.04);
+  }
+  body { background: var(--bg); font-family: var(--font-sans); color: var(--text); font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .wrapper { max-width: 780px; margin: 0 auto; padding: 0 20px; }
+
+  /* TOPBAR */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .topbar-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 8px; background: var(--text); display: flex; align-items: center; justify-content: center; }
+  .brand-name { font-size: 15px; font-weight: 500; letter-spacing: -0.3px; }
+  .brand-sep { color: var(--border2); font-weight: 300; }
+  .brand-sub { font-size: 12px; color: var(--text2); }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--text2); background: var(--surface); cursor: default; text-decoration: none; font-family: var(--font-sans); display: inline-block; }
+  .chip.live { border-color: var(--green); color: var(--green); }
+  .chip.live::before { content: ''; display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--green); margin-right: 5px; vertical-align: 1px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* HERO */
+  .hero { padding: 28px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .hero-date { font-size: 11px; font-family: var(--font-mono); color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .hero-title { font-size: 22px; font-weight: 500; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .hero-sub { font-size: 13px; color: var(--text2); }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 28px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .stat-val { font-size: 20px; font-weight: 500; letter-spacing: -0.5px; font-family: var(--font-mono); }
+  .stat-val.green { color: var(--green); }
+  .stat-val.red { color: var(--red); }
+  .stat-val.blue { color: var(--blue); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* SECTION */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+  .section-count { font-size: 11px; font-family: var(--font-mono); background: var(--surface2); color: var(--text2); padding: 2px 8px; border-radius: 20px; }
+
+  /* MARKET NOTE */
+  .market-note { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 24px; box-shadow: var(--shadow); }
+  .note-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); margin-bottom: 8px; font-weight: 500; }
+  .note-text { font-size: 13px; color: var(--text); line-height: 1.7; }
+
+  /* TRADE CARD */
+  .trades-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .trade-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; box-shadow: var(--shadow); transition: border-color 0.15s; }
+  .trade-card:hover { border-color: var(--border2); }
+  .trade-card.long  { border-left: 3px solid var(--green-mid); }
+  .trade-card.short { border-left: 3px solid var(--red-mid); }
+  .tc-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+  .tc-symbol { font-size: 17px; font-weight: 500; letter-spacing: -0.3px; font-family: var(--font-mono); }
+  .tc-meta { font-size: 11px; color: var(--text3); margin-top: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tc-meta-sep { color: var(--border2); }
+  .signal-badge { font-size: 11px; font-weight: 500; padding: 4px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; }
+  .signal-badge.long  { background: var(--green-bg); color: var(--green); }
+  .signal-badge.short { background: var(--red-bg); color: var(--red); }
+  .signal-badge::before { content:''; width:5px; height:5px; border-radius:50%; }
+  .signal-badge.long::before  { background: var(--green); }
+  .signal-badge.short::before { background: var(--red); }
+  .tc-levels { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 12px 0; margin-bottom: 12px; }
+  .tc-level-label { font-size: 10px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tc-level-val { font-size: 13px; font-weight: 500; font-family: var(--font-mono); }
+  .tc-level-val.entry  { color: var(--text); }
+  .tc-level-val.target { color: var(--green); }
+  .tc-level-val.sl     { color: var(--red); }
+  .tc-level-val.rr     { color: var(--blue); }
+  .tc-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .tc-setup { font-size: 12px; color: var(--text2); }
+  .tc-tags { display: flex; gap: 6px; }
+  .tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border); color: var(--text3); }
+  .tag.index  { background: var(--blue-bg);  border-color: #C8DAEF; color: var(--blue); }
+  .tag.hold   { background: var(--amber-bg); border-color: #F0D8A0; color: var(--amber); }
+
+  /* HISTORY TABLE */
+  .history-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 28px; box-shadow: var(--shadow); }
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table thead th { font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); padding: 10px 16px; text-align: left; background: var(--surface2); border-bottom: 1px solid var(--border); font-weight: 500; }
+  .history-table thead th:last-child { text-align: right; }
+  .history-table tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  .history-table tbody tr:last-child td { border-bottom: none; }
+  .history-table tbody tr:hover td { background: var(--surface2); }
+  .ht-sym { font-weight: 500; font-family: var(--font-mono); font-size: 13px; }
+  .ht-date { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .ht-pnl { font-family: var(--font-mono); font-weight: 500; font-size: 13px; text-align: right; }
+  .ht-pnl.win  { color: var(--green); }
+  .ht-pnl.loss { color: var(--red); }
+  .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500; font-family: var(--font-mono); }
+  .status-badge.target  { background: var(--green-bg); color: var(--green); }
+  .status-badge.sl      { background: var(--red-bg);   color: var(--red); }
+  .status-badge.open    { background: var(--blue-bg);  color: var(--blue); }
+
+  /* LOADING / ERROR */
+  .loading-state { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 13px; }
+  .loading-spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--text2); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-box { background: var(--red-bg); border: 1px solid #F5C4B3; border-radius: var(--radius); padding: 14px 18px; font-size: 13px; color: var(--red); margin-bottom: 20px; }
+
+  /* FOOTER */
+  .footer { border-top: 1px solid var(--border); padding: 20px 0 40px; }
+  .footer-inner { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  .footer-brand { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .footer-text { font-size: 11px; color: var(--text3); line-height: 1.6; max-width: 380px; }
+  .footer-right { text-align: right; }
+  .footer-links { display: flex; gap: 12px; margin-bottom: 6px; justify-content: flex-end; }
+  .footer-link { font-size: 12px; color: var(--text2); text-decoration: none; }
+  .footer-link:hover { color: var(--text); }
+  .last-updated { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .tc-levels { grid-template-columns: repeat(2,1fr); }
+    .hero-title { font-size: 18px; }
+    .footer-inner { flex-direction: column; }
+    .footer-right { text-align: left; }
+    .footer-links { justify-content: flex-start; }
+    .brand-sub { display: none; }
+    .history-table thead th:nth-child(3),
+    .history-table tbody td:nth-child(3),
+    .history-table thead th:nth-child(4),
+    .history-table tbody td:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrapper">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">
+          <span style="font-size:11px;font-weight:500;color:#fff;letter-spacing:0.5px;font-family:var(--font-sans)">PF</span>
+        </div>
+        <span class="brand-name">Palani Fortuna</span>
+        <span class="brand-sep">|</span>
+        <span class="brand-sub">Disciplined swing trades. Consistent edge.</span>
+      </div>
+      <div class="topbar-right">
+        <span class="chip live" id="live-chip">Updating…</span>
+        <a class="chip" href="mailto:your@email.com?subject=Subscribe to Palani Fortuna">&#9993; Subscribe</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <div class="hero">
+    <div class="hero-date" id="hero-date">Loading…</div>
+    <div class="hero-title">Palani Fortuna — Daily Swing Calls</div>
+    <div class="hero-sub">Disciplined swing trades. Consistent edge. &nbsp;·&nbsp; 5–7 day setups across Nifty 50, Next 50, Midcap 100, Smallcap 100 &amp; F&amp;O</div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Active calls</div>
+      <div class="stat-val blue" id="stat-active">—</div>
+      <div class="stat-sub">Open positions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Closed (all time)</div>
+      <div class="stat-val" id="stat-closed">—</div>
+      <div class="stat-sub">Total trades</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Win rate</div>
+      <div class="stat-val green" id="stat-winrate">—</div>
+      <div class="stat-sub">Closed trades</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg return</div>
+      <div class="stat-val green" id="stat-avgret">—</div>
+      <div class="stat-sub">Per closed trade</div>
+    </div>
+  </div>
+
+  <div class="market-note" id="market-note-box" style="display:none">
+    <div class="note-label">Today's market context</div>
+    <div class="note-text" id="market-note-text"></div>
+  </div>
+
+  <div id="error-box" style="display:none" class="error-box">
+    Could not load data. Please check your Google Sheet URL is published and try again.
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Active recommendations</span>
+    <span class="section-count" id="active-count">—</span>
+  </div>
+  <div class="trades-list" id="active-trades">
+    <div class="loading-state"><div class="loading-spinner"></div>Loading today's calls…</div>
+  </div>
+
+  <div class="section-header" style="margin-top:8px">
+    <span class="section-title">Closed trades</span>
+    <span class="section-count">Recent history</span>
+  </div>
+  <div class="history-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Index</th>
+          <th>Direction</th>
+          <th>Entry</th>
+          <th>Exit</th>
+          <th>Hold</th>
+          <th>Status</th>
+          <th style="text-align:right">Return</th>
+        </tr>
+      </thead>
+      <tbody id="history-tbody">
+        <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:24px;font-size:13px">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Palani Fortuna</div>
+        <div class="footer-text">
+          Daily NSE swing trade ideas for educational purposes only. Not SEBI-registered investment advice.
+          Personal views only. Trade at your own risk. Past performance does not guarantee future results. Always use a stop loss.
+        </div>
+        <div class="last-updated" id="last-updated"></div>
+      </div>
+      <div class="footer-right">
+        <div class="footer-links">
+          <a class="footer-link" href="#">WhatsApp group</a>
+          <a class="footer-link" href="#">Archive</a>
+          <a class="footer-link" href="mailto:your@email.com">Contact</a>
+        </div>
+        <div class="footer-text">Updated every trading day by 3:15 PM IST.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  STEP 1: Paste your Google Sheet CSV URL here
+//  (See setup guide for how to get this URL)
+// ════════════════════════════════════════════════════════
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRxP13J6yAG5DODSJ9pXKaxrUy_CGJ0yb0Hw_Qu7OcywmtmAT9MlrGEh9kI9HOra9N6dkSZdOTa8o89/pub?gid=660828780&single=true&output=csv";
+
+// ════════════════════════════════════════════════════════
+//  DO NOT EDIT BELOW THIS LINE
+// ════════════════════════════════════════════════════════
+
+function fmt(v) { return v && v.trim() ? v.trim() : "—"; }
+function fmtPrice(v) {
+  const n = parseFloat(v);
+  if (isNaN(n)) return v || "—";
+  return "₹" + n.toLocaleString("en-IN", {minimumFractionDigits: n < 100 ? 2 : 0, maximumFractionDigits: 2});
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",").map(h => h.replace(/"/g,"").trim().toLowerCase());
+  return lines.slice(1).map(line => {
+    const vals = [];
+    let cur = "", inQ = false;
+    for (let c of line) {
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { vals.push(cur.trim()); cur = ""; }
+      else { cur += c; }
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (vals[i] || "").replace(/^"|"$/g,"").trim());
+    return obj;
+  }).filter(r => r.symbol && r.symbol.length > 0);
+}
+
+function dayCount(addedStr) {
+  try {
+    const d = new Date(addedStr);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 86400000) + 1;
+    return Math.min(Math.max(diff, 1), 7);
+  } catch(e) { return 1; }
+}
+
+function buildTradeCard(r) {
+  const dir = (r.direction || "long").toLowerCase();
+  const isLong = dir === "long";
+  const day = dayCount(r.added);
+  return `
+  <div class="trade-card ${dir}">
+    <div class="tc-header">
+      <div>
+        <div class="tc-symbol">${fmt(r.symbol)}</div>
+        <div class="tc-meta">
+          <span>${fmt(r.index)}</span>
+          <span class="tc-meta-sep">·</span>
+          <span>Added ${fmt(r.added)}</span>
+          <span class="tc-meta-sep">·</span>
+          <span>Day ${day} of 7</span>
+        </div>
+      </div>
+      <span class="signal-badge ${dir}">${isLong ? "Long" : "Short"}</span>
+    </div>
+    <div class="tc-levels">
+      <div>
+        <div class="tc-level-label">Entry zone</div>
+        <div class="tc-level-val entry">${fmt(r.entry)}</div>
+      </div>
+      <div>
+        <div class="tc-level-label">Target</div>
+        <div class="tc-level-val target">${fmt(r.target)}</div>
+      </div>
+      <div>
+        <div class="tc-level-label">Stop loss</div>
+        <div class="tc-level-val sl">${fmt(r.stoploss)}</div>
+      </div>
+      <div>
+        <div class="tc-level-label">R : R</div>
+        <div class="tc-level-val rr">${fmt(r.rr)}</div>
+      </div>
+    </div>
+    <div class="tc-footer">
+      <span class="tc-setup">${fmt(r.setup)}</span>
+      <div class="tc-tags">
+        <span class="tag index">${fmt(r.index)}</span>
+        <span class="tag hold">5–7 days</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildHistoryRow(r) {
+  const win = !r.return.startsWith("-");
+  const statusMap = { "target hit": "target", "sl hit": "sl", "open": "open" };
+  const statusKey = statusMap[(r.status || "").toLowerCase()] || "open";
+  const dir = (r.direction || "long").toLowerCase();
+  return `<tr>
+    <td><div class="ht-sym">${fmt(r.symbol)}</div><div class="ht-date">Closed ${fmt(r.closed)}</div></td>
+    <td><span class="tag index">${fmt(r.index)}</span></td>
+    <td><span class="signal-badge ${dir}" style="font-size:10px;padding:2px 8px">${dir === "long" ? "Long" : "Short"}</span></td>
+    <td style="font-family:var(--font-mono);font-size:12px">${fmtPrice(r.entry)}</td>
+    <td style="font-family:var(--font-mono);font-size:12px">${fmtPrice(r.exit)}</td>
+    <td style="font-size:11px;color:var(--text3)">${fmt(r.hold)}</td>
+    <td><span class="status-badge ${statusKey}">${fmt(r.status)}</span></td>
+    <td class="ht-pnl ${win ? 'win' : 'loss'}">${fmt(r.return)}</td>
+  </tr>`;
+}
+
+async function loadData() {
+  if (SHEET_URL === "YOUR_GOOGLE_SHEET_CSV_URL_HERE") {
+    showDemo(); return;
+  }
+  try {
+    const res = await fetch(SHEET_URL + "&t=" + Date.now());
+    if (!res.ok) throw new Error("Fetch failed");
+    const text = await res.text();
+    const rows = parseCSV(text);
+    renderAll(rows);
+  } catch(e) {
+    document.getElementById("error-box").style.display = "block";
+    document.getElementById("active-trades").innerHTML =
+      '<div class="loading-state">Could not load data. Is your sheet published?</div>';
+    document.getElementById("history-tbody").innerHTML =
+      '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;font-size:13px">No data</td></tr>';
+    document.getElementById("live-chip").textContent = "Offline";
+    document.getElementById("live-chip").style.borderColor = "var(--red)";
+    document.getElementById("live-chip").style.color = "var(--red)";
+  }
+}
+
+function renderAll(rows) {
+  // Separate tabs: "meta" row for date/note/stats, "active" rows, "history" rows
+  const meta    = rows.find(r => r.type === "meta") || {};
+  const active  = rows.filter(r => r.type === "active");
+  const history = rows.filter(r => r.type === "history");
+
+  // Date + issue
+  const dateStr = meta.date || new Date().toLocaleDateString("en-IN", {weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const issue   = meta.issue || "";
+  document.getElementById("hero-date").textContent = dateStr + (issue ? "  ·  Issue #" + issue : "");
+
+  // Stats
+  document.getElementById("stat-active").textContent  = meta.active  || active.length;
+  document.getElementById("stat-closed").textContent  = meta.closed  || history.length;
+  const wr = meta.winrate || "";
+  const ar = meta.avgreturn || "";
+  const wrEl = document.getElementById("stat-winrate");
+  wrEl.textContent = wr || "—";
+  wrEl.className = "stat-val " + (parseFloat(wr) >= 50 ? "green" : "red");
+  const arEl = document.getElementById("stat-avgret");
+  arEl.textContent = ar || "—";
+  arEl.className = "stat-val " + (ar.startsWith("-") ? "red" : "green");
+
+  // Market note
+  if (meta.note) {
+    document.getElementById("market-note-text").textContent = meta.note;
+    document.getElementById("market-note-box").style.display = "block";
+  }
+
+  // Active trades
+  document.getElementById("active-count").textContent = active.length + " open";
+  document.getElementById("active-trades").innerHTML = active.length
+    ? active.map(buildTradeCard).join("")
+    : '<div class="loading-state" style="padding:32px">No active calls today. Check back after 3 PM IST.</div>';
+
+  // History
+  document.getElementById("history-tbody").innerHTML = history.length
+    ? history.map(buildHistoryRow).join("")
+    : '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:20px;font-size:13px">No closed trades yet</td></tr>';
+
+  // Live chip
+  const chip = document.getElementById("live-chip");
+  chip.className = "chip live";
+  chip.textContent = "Live";
+
+  // Last updated
+  document.getElementById("last-updated").textContent = "Last loaded: " + new Date().toLocaleTimeString("en-IN");
+}
+
+// ── DEMO DATA (shown until real sheet is connected) ──────
+function showDemo() {
+  const demo = [
+    {type:"meta", date:"Friday, 30 May 2025", issue:"001", active:"3", closed:"4", winrate:"75%", avgreturn:"+4.2%", note:"Nifty held 22,400 support with decent breadth. Midcap and Smallcap showed relative strength. Bias is cautiously bullish — looking for momentum setups in pharma, power and banking sectors."},
+    {type:"active", symbol:"TATAPOWER", index:"Next 50",    direction:"long",  added:"28 May 2025", entry:"₹418 – 422", target:"₹448", stoploss:"₹407", rr:"1 : 2.5", setup:"EMA 20/50 crossover + volume surge"},
+    {type:"active", symbol:"HDFCAMC",   index:"Midcap 100", direction:"long",  added:"29 May 2025", entry:"₹3,820 – 3,860", target:"₹4,050", stoploss:"₹3,740", rr:"1 : 2.3", setup:"52-week high breakout + rising ADX"},
+    {type:"active", symbol:"INDIAMART", index:"F&O",        direction:"short", added:"29 May 2025", entry:"₹2,480 – 2,510", target:"₹2,310", stoploss:"₹2,560", rr:"1 : 3.4", setup:"Distribution pattern + RSI divergence"},
+    {type:"history", symbol:"RELIANCE", index:"Nifty 50",    direction:"long",  entry:"2891", exit:"3067", closed:"27 May", hold:"5 days", status:"Target hit", return:"+6.1%"},
+    {type:"history", symbol:"AXISBANK", index:"Nifty 50",    direction:"long",  entry:"1102", exit:"1144", closed:"26 May", hold:"4 days", status:"Target hit", return:"+3.8%"},
+    {type:"history", symbol:"PAGEIND",  index:"Midcap 100",  direction:"long",  entry:"41200",exit:"40623",closed:"25 May", hold:"3 days", status:"SL hit",     return:"-1.4%"},
+    {type:"history", symbol:"CANBK",    index:"F&O",         direction:"short", entry:"112.4",exit:"106.6",closed:"24 May", hold:"6 days", status:"Target hit", return:"+5.2%"},
+  ];
+  renderAll(demo);
+  document.getElementById("live-chip").textContent = "Demo";
+  document.getElementById("live-chip").style.borderColor = "var(--amber)";
+  document.getElementById("live-chip").style.color = "var(--amber)";
+  document.getElementById("live-chip").style.removeProperty("animation");
+}
+
+loadData();
+</script>
+</body>
+</html>
